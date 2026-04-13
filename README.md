@@ -1,16 +1,16 @@
-# ⚽ Gestão de Transferências de Jogadores
+#  Gestão de Transferências de Jogadores
 
 Sistema focado no mercado de transferências no futebol, permitindo gerir jogadores, clubes, empresários e transferências.
 
 ---
 
-## 📌 Descrição
+##  Descrição
 
 Este projeto tem como objetivo desenvolver um sistema de gestão que simula o mercado de transferências no futebol, permitindo o registo, consulta e manipulação de dados através de operações CRUD.
 
 ---
 
-## 🎯 Objetivos
+##  Objetivos
 
 - Gerir jogadores  
 - Gerir clubes  
@@ -21,16 +21,16 @@ Este projeto tem como objetivo desenvolver um sistema de gestão que simula o me
 
 ---
 
-## 🧩 Entidades
+##  Entidades
 
-- 👤 Jogador  
-- 🔄 Transferência  
-- 🏟️ Clube  
-- 🤝 Empresário  
+-  Jogador  
+-  Transferência  
+-  Clube  
+-  Empresário  
 
 ---
 
-## 🔗 Relações entre Entidades
+##  Relações entre Entidades
 
 - Um jogador pode ter várias transferências ao longo da sua carreira  
 - Cada transferência está associada a um único jogador  
@@ -40,27 +40,27 @@ Este projeto tem como objetivo desenvolver um sistema de gestão que simula o me
 
 ---
 
-## 🔄 Operações CRUD
+##  Operações CRUD
 
-### 👤 Jogador
+###  Jogador
 - Criar jogador  
 - Listar jogadores  
 - Atualizar jogador  
 - Remover jogador  
 
-### 🔄 Transferência
+###  Transferência
 - Criar transferência  
 - Listar transferências  
 - Atualizar transferência  
 - Remover transferência  
 
-### 🏟️ Clube
+###  Clube
 - Criar clube  
 - Listar clubes  
 - Atualizar clube  
 - Remover clube  
 
-### 🤝 Empresário
+###  Empresário
 - Criar empresário  
 - Listar empresários  
 - Atualizar empresário  
@@ -68,7 +68,7 @@ Este projeto tem como objetivo desenvolver um sistema de gestão que simula o me
 
 ---
 
-## 💡 Funcionalidades
+##  Funcionalidades
 
 - Registo de transferências (origem → destino)  
 - Histórico de transferências por jogador  
@@ -77,7 +77,7 @@ Este projeto tem como objetivo desenvolver um sistema de gestão que simula o me
   
 ---
 
-## 📚 Conceitos Aplicados
+##  Conceitos Aplicados
 
 - Estruturas de dados  
 - Programação orientada a objetos  
@@ -86,6 +86,6 @@ Este projeto tem como objetivo desenvolver um sistema de gestão que simula o me
 
 ---
 
-## 👨‍💻 Autor
+##  Autor
 
 - VInicius Pereira 
