@@ -1,164 +1,93 @@
-# ============================================
-#   clubes.py — CRUD de Clubes
-# ============================================
+# ==============================
+# clubes.py
+# CRUD de Clubes
+# ==============================
 
 clubes = []
-proximo_id_clube = 1
-
-
-def _linha():
-    print("-" * 45)
+proximo_id = 1
 
 
 def _encontrar_clube(id_clube):
-    """Devolve o clube com esse id, ou None."""
     for c in clubes:
         if c["id"] == id_clube:
             return c
     return None
 
 
-# ──────────────────────────────────────────
-#  CREATE
-# ──────────────────────────────────────────
+# CREATE
+def criar_clube(nome, pais, liga, estadio, fundacao):
+    global proximo_id
 
-def adicionar_clube():
-    global proximo_id_clube
-
-    print("\n  --- ADICIONAR CLUBE ---")
-    nome  = input("  Nome do clube : ")
-    pais  = input("  Pais          : ")
-    liga  = input("  Liga          : ")
+    if not nome or not pais or not liga:
+        return (400, "Nome, pais e liga sao obrigatorios.")
 
     clube = {
-        "id"   : proximo_id_clube,
-        "nome" : nome,
-        "pais" : pais,
-        "liga" : liga
+        "id"      : proximo_id,
+        "nome"    : nome,
+        "pais"    : pais,
+        "liga"    : liga,
+        "estadio" : estadio,
+        "fundacao": fundacao
     }
-
     clubes.append(clube)
-    proximo_id_clube += 1
-    print(f"  Clube '{nome}' adicionado! (ID: {clube['id']})")
+    proximo_id += 1
+    return (201, "Clube criado com sucesso.", clube)
 
 
-# ──────────────────────────────────────────
-#  READ
-# ──────────────────────────────────────────
-
+# READ - listar todos
 def listar_clubes():
-    print("\n  --- LISTA DE CLUBES ---")
-
     if len(clubes) == 0:
-        print("  Nao ha clubes registados.")
-        return
-
-    print(f"  {'ID':<5} {'Nome':<20} {'Pais':<15} {'Liga'}")
-    _linha()
-    for c in clubes:
-        print(f"  {c['id']:<5} {c['nome']:<20} {c['pais']:<15} {c['liga']}")
+        return (200, "Sem clubes registados.", [])
+    return (200, "OK", clubes)
 
 
-def listar_clubes_resumo():
-    """Versao curta para usar noutros ficheiros."""
-    if len(clubes) == 0:
-        print("  (Sem clubes registados)")
-        return
-    for c in clubes:
-        print(f"    [{c['id']}] {c['nome']} ({c['pais']})")
-
-
-def obter_clube(id_clube):
-    """Devolve o dicionario do clube ou None."""
-    return _encontrar_clube(id_clube)
-
-
-# ──────────────────────────────────────────
-#  UPDATE
-# ──────────────────────────────────────────
-
-def editar_clube():
-    print("\n  --- EDITAR CLUBE ---")
-    listar_clubes_resumo()
-
+# READ - consultar um
+def consultar_clube(id_clube):
     try:
-        id_clube = int(input("\n  ID do clube a editar: "))
-    except ValueError:
-        print("  ID invalido.")
-        return
+        id_clube = int(id_clube)
+    except (ValueError, TypeError):
+        return (400, "ID invalido.")
 
-    clube = _encontrar_clube(id_clube)
-    if clube is None:
-        print("  Clube nao encontrado.")
-        return
-
-    print(f"  A editar: {clube['nome']}  (deixa em branco para nao alterar)")
-
-    nome = input(f"  Nome [{clube['nome']}]: ")
-    pais = input(f"  Pais [{clube['pais']}]: ")
-    liga = input(f"  Liga [{clube['liga']}]: ")
-
-    if nome != "": clube["nome"] = nome
-    if pais != "": clube["pais"] = pais
-    if liga != "": clube["liga"] = liga
-
-    print("  Clube atualizado!")
+    c = _encontrar_clube(id_clube)
+    if c is None:
+        return (404, "Clube nao encontrado.")
+    return (200, "OK", c)
 
 
-# ──────────────────────────────────────────
-#  DELETE
-# ──────────────────────────────────────────
-
-def eliminar_clube(jogadores):
-    """Recebe a lista de jogadores para verificar dependencias."""
-    print("\n  --- ELIMINAR CLUBE ---")
-    listar_clubes_resumo()
-
+# UPDATE
+def atualizar_clube(id_clube, nome=None, pais=None, liga=None, estadio=None, fundacao=None):
     try:
-        id_clube = int(input("\n  ID do clube a eliminar: "))
-    except ValueError:
-        print("  ID invalido.")
-        return
+        id_clube = int(id_clube)
+    except (ValueError, TypeError):
+        return (400, "ID invalido.")
 
-    clube = _encontrar_clube(id_clube)
-    if clube is None:
-        print("  Clube nao encontrado.")
-        return
+    c = _encontrar_clube(id_clube)
+    if c is None:
+        return (404, "Clube nao encontrado.")
 
-    # Nao deixa eliminar se tiver jogadores
+    if nome:     c["nome"]     = nome
+    if pais:     c["pais"]     = pais
+    if liga:     c["liga"]     = liga
+    if estadio:  c["estadio"]  = estadio
+    if fundacao: c["fundacao"] = fundacao
+
+    return (200, "Clube atualizado com sucesso.", c)
+
+
+# DELETE
+def remover_clube(id_clube, jogadores):
+    try:
+        id_clube = int(id_clube)
+    except (ValueError, TypeError):
+        return (400, "ID invalido.")
+
+    c = _encontrar_clube(id_clube)
+    if c is None:
+        return (404, "Clube nao encontrado.")
+
     for j in jogadores:
         if j["clube_id"] == id_clube:
-            print(f"  Erro: o jogador '{j['nome']}' ainda pertence a este clube.")
-            return
+            return (400, f"Nao e possivel remover: o jogador '{j['nome']}' ainda pertence a este clube.")
 
-    confirmacao = input(f"  Eliminar '{clube['nome']}'? (s/n): ")
-    if confirmacao.lower() == "s":
-        clubes.remove(clube)
-        print("  Clube eliminado!")
-    else:
-        print("  Operacao cancelada.")
-
-
-# ──────────────────────────────────────────
-#  MENU
-# ──────────────────────────────────────────
-
-def menu_clubes(jogadores):
-    while True:
-        print("\n=============================")
-        print("       MENU — CLUBES         ")
-        print("=============================")
-        print("  1. Adicionar clube")
-        print("  2. Listar clubes")
-        print("  3. Editar clube")
-        print("  4. Eliminar clube")
-        print("  0. Voltar")
-        _linha()
-        opcao = input("  Opcao: ")
-
-        if   opcao == "1": adicionar_clube()
-        elif opcao == "2": listar_clubes()
-        elif opcao == "3": editar_clube()
-        elif opcao == "4": eliminar_clube(jogadores)
-        elif opcao == "0": break
-        else: print("  Opcao invalida!")
+    clubes.remove(c)
+    return (200, f"Clube '{c['nome']}' removido com sucesso.")
