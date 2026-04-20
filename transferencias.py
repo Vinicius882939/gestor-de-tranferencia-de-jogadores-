@@ -1,372 +1,111 @@
-# ============================================
-#   transferencias.py — CRUD de Transferencias
-# ============================================
+# ==============================
+# transferencias.py
+# CRUD de Transferencias
+# ==============================
 
 transferencias = []
-proximo_id_transferencia = 1
+proximo_id = 1
 
 
-def _linha():
-    print("-" * 45)
-
-
-def _encontrar_transferencia(id_t):
-    """Devolve a transferencia com esse id, ou None."""
+def _encontrar_transferencia(id_transferencia):
     for t in transferencias:
-        if t["id"] == id_t:
+        if t["id"] == id_transferencia:
             return t
     return None
 
 
-def _nome_clube(clubes, id_clube):
-    """Devolve o nome do clube pelo id."""
-    for c in clubes:
-        if c["id"] == id_clube:
-            return c["nome"]
-    return "Livre"
+# CREATE
+def criar_transferencia(jogador_id, clube_origem_id, clube_destino_id,
+                        empresario_id, valor, data):
+    global proximo_id
 
+    if not jogador_id or not clube_destino_id:
+        return (400, "Jogador e clube de destino sao obrigatorios.")
 
-def _nome_empresario(empresarios, id_emp):
-    """Devolve o nome do empresario pelo id."""
-    for e in empresarios:
-        if e["id"] == id_emp:
-            return e["nome"]
-    return "Sem empresario"
-
-
-# ──────────────────────────────────────────
-#  CREATE
-# ──────────────────────────────────────────
-
-def adicionar_transferencia(jogadores, clubes, empresarios):
-    global proximo_id_transferencia
-
-    print("\n  --- REGISTAR TRANSFERENCIA ---")
-
-    if len(jogadores) == 0:
-        print("  Nao ha jogadores registados.")
-        return
-    if len(clubes) == 0:
-        print("  Nao ha clubes registados.")
-        return
-
-    # Escolher jogador
-    print("\n  Jogadores disponiveis:")
-    for j in jogadores:
-        nome_clube = _nome_clube(clubes, j["clube_id"])
-        print(f"    [{j['id']}] {j['nome']} ({j['posicao']}) — {nome_clube}")
+    if clube_origem_id and clube_origem_id == clube_destino_id:
+        return (400, "Clube de origem e destino nao podem ser iguais.")
 
     try:
-        id_jogador = int(input("\n  ID do jogador: "))
-    except ValueError:
-        print("  ID invalido.")
-        return
-
-    jogador = None
-    for j in jogadores:
-        if j["id"] == id_jogador:
-            jogador = j
-            break
-
-    if jogador is None:
-        print("  Jogador nao encontrado.")
-        return
-
-    # Clube de destino
-    print("\n  Clubes disponiveis:")
-    for c in clubes:
-        print(f"    [{c['id']}] {c['nome']} ({c['pais']})")
-
-    try:
-        id_destino = int(input("\n  ID do clube de destino: "))
-    except ValueError:
-        print("  ID invalido.")
-        return
-
-    clube_destino = None
-    for c in clubes:
-        if c["id"] == id_destino:
-            clube_destino = c
-            break
-
-    if clube_destino is None:
-        print("  Clube nao encontrado.")
-        return
-
-    if jogador["clube_id"] == id_destino:
-        print("  O jogador ja pertence a esse clube.")
-        return
-
-    # Empresario (opcional)
-    empresario_id = None
-    if len(empresarios) > 0:
-        print("\n  Empresarios disponiveis:")
-        for e in empresarios:
-            print(f"    [{e['id']}] {e['nome']}")
-        entrada = input("  ID do empresario (ENTER = nenhum): ")
-        if entrada != "":
-            try:
-                eid = int(entrada)
-                for e in empresarios:
-                    if e["id"] == eid:
-                        empresario_id = eid
-                        break
-            except ValueError:
-                pass
-
-    # Valor e data
-    try:
-        valor = float(input("  Valor da transferencia (M euros): "))
-    except ValueError:
-        print("  Valor invalido. A usar 0.")
-        valor = 0.0
-
-    data = input("  Data (DD/MM/AAAA): ")
+        valor = float(valor)
+    except (ValueError, TypeError):
+        return (400, "Valor invalido.")
 
     transferencia = {
-        "id"               : proximo_id_transferencia,
-        "jogador_id"       : id_jogador,
-        "clube_origem_id"  : jogador["clube_id"],   # guarda de onde vem
-        "clube_destino_id" : id_destino,
-        "empresario_id"    : empresario_id,
+        "id"               : proximo_id,
+        "jogador_id"       : int(jogador_id),
+        "clube_origem_id"  : int(clube_origem_id) if clube_origem_id else None,
+        "clube_destino_id" : int(clube_destino_id),
+        "empresario_id"    : int(empresario_id) if empresario_id else None,
         "valor"            : valor,
         "data"             : data,
         "estado"           : "pendente"
     }
-
     transferencias.append(transferencia)
-    proximo_id_transferencia += 1
-    print(f"  Transferencia registada com sucesso! (ID: {transferencia['id']})")
+    proximo_id += 1
+    return (201, "Transferencia criada com sucesso.", transferencia)
 
 
-# ──────────────────────────────────────────
-#  READ
-# ──────────────────────────────────────────
-
-def listar_transferencias(jogadores, clubes, empresarios):
-    print("\n  --- LISTA DE TRANSFERENCIAS ---")
-
+# READ - listar todas
+def listar_transferencias():
     if len(transferencias) == 0:
-        print("  Nao ha transferencias registadas.")
-        return
-
-    print(f"  {'ID':<5} {'Jogador':<16} {'Origem':<14} {'Destino':<14} {'Valor':>7}  {'Data':<12} {'Estado'}")
-    _linha()
-    for t in transferencias:
-        # Encontra nomes
-        nome_j = "?"
-        for j in jogadores:
-            if j["id"] == t["jogador_id"]:
-                nome_j = j["nome"]
-                break
-
-        nome_o = _nome_clube(clubes, t["clube_origem_id"])
-        nome_d = _nome_clube(clubes, t["clube_destino_id"])
-
-        print(f"  {t['id']:<5} {nome_j:<16} {nome_o:<14} {nome_d:<14} "
-              f"{t['valor']:>5.1f}M  {t['data']:<12} {t['estado']}")
+        return (200, "Sem transferencias registadas.", [])
+    return (200, "OK", transferencias)
 
 
-def ver_transferencia(jogadores, clubes, empresarios):
-    print("\n  --- DETALHES DA TRANSFERENCIA ---")
-    _listar_resumo()
-
+# READ - consultar uma
+def consultar_transferencia(id_transferencia):
     try:
-        id_t = int(input("\n  ID da transferencia: "))
-    except ValueError:
-        print("  ID invalido.")
-        return
+        id_transferencia = int(id_transferencia)
+    except (ValueError, TypeError):
+        return (400, "ID invalido.")
 
-    t = _encontrar_transferencia(id_t)
+    t = _encontrar_transferencia(id_transferencia)
     if t is None:
-        print("  Transferencia nao encontrada.")
-        return
-
-    nome_j = "?"
-    for j in jogadores:
-        if j["id"] == t["jogador_id"]:
-            nome_j = j["nome"]
-            break
-
-    nome_emp = _nome_empresario(empresarios, t["empresario_id"])
-
-    print()
-    _linha()
-    print(f"  ID            : {t['id']}")
-    print(f"  Jogador       : {nome_j}")
-    print(f"  Clube origem  : {_nome_clube(clubes, t['clube_origem_id'])}")
-    print(f"  Clube destino : {_nome_clube(clubes, t['clube_destino_id'])}")
-    print(f"  Empresario    : {nome_emp}")
-    print(f"  Valor         : {t['valor']}M euros")
-    print(f"  Data          : {t['data']}")
-    print(f"  Estado        : {t['estado']}")
-    _linha()
+        return (404, "Transferencia nao encontrada.")
+    return (200, "OK", t)
 
 
-def _listar_resumo():
-    """Versao curta para usar dentro do ficheiro."""
-    if len(transferencias) == 0:
-        print("  (Sem transferencias registadas)")
-        return
-    for t in transferencias:
-        print(f"    [{t['id']}] Jogador ID {t['jogador_id']} -> Clube ID {t['clube_destino_id']} | {t['valor']}M | {t['estado']}")
-
-
-# ──────────────────────────────────────────
-#  UPDATE
-# ──────────────────────────────────────────
-
-def editar_transferencia():
-    """Permite editar valor e data de uma transferencia pendente."""
-    print("\n  --- EDITAR TRANSFERENCIA ---")
-    _listar_resumo()
-
+# UPDATE
+def atualizar_transferencia(id_transferencia, valor=None, data=None, estado=None):
     try:
-        id_t = int(input("\n  ID da transferencia a editar: "))
-    except ValueError:
-        print("  ID invalido.")
-        return
+        id_transferencia = int(id_transferencia)
+    except (ValueError, TypeError):
+        return (400, "ID invalido.")
 
-    t = _encontrar_transferencia(id_t)
+    t = _encontrar_transferencia(id_transferencia)
     if t is None:
-        print("  Transferencia nao encontrada.")
-        return
+        return (404, "Transferencia nao encontrada.")
 
     if t["estado"] != "pendente":
-        print(f"  So e possivel editar transferencias pendentes (estado atual: {t['estado']}).")
-        return
+        return (400, f"Nao e possivel editar uma transferencia '{t['estado']}'.")
 
-    print("  (Deixa em branco para nao alterar)")
-    valor_str = input(f"  Valor [{t['valor']}]: ")
-    data      = input(f"  Data  [{t['data']}]: ")
-
-    if valor_str != "":
+    if valor:
         try:
-            t["valor"] = float(valor_str)
+            t["valor"] = float(valor)
         except ValueError:
-            print("  Valor invalido, nao foi alterado.")
-    if data != "":
-        t["data"] = data
+            return (400, "Valor invalido.")
+    if data:  t["data"]  = data
+    if estado:
+        if estado not in ("pendente", "concluida", "cancelada"):
+            return (400, "Estado invalido. Use: pendente, concluida ou cancelada.")
+        t["estado"] = estado
 
-    print("  Transferencia atualizada!")
+    return (200, "Transferencia atualizada com sucesso.", t)
 
 
-def concluir_transferencia(jogadores):
-    """Conclui a transferencia e move o jogador para o clube destino."""
-    print("\n  --- CONCLUIR TRANSFERENCIA ---")
-
-    pendentes = [t for t in transferencias if t["estado"] == "pendente"]
-    if len(pendentes) == 0:
-        print("  Nao ha transferencias pendentes.")
-        return
-
-    for t in pendentes:
-        print(f"    [{t['id']}] Jogador ID {t['jogador_id']} -> Clube ID {t['clube_destino_id']} | {t['valor']}M")
-
+# DELETE
+def remover_transferencia(id_transferencia):
     try:
-        id_t = int(input("\n  ID da transferencia a concluir: "))
-    except ValueError:
-        print("  ID invalido.")
-        return
+        id_transferencia = int(id_transferencia)
+    except (ValueError, TypeError):
+        return (400, "ID invalido.")
 
-    t = _encontrar_transferencia(id_t)
-    if t is None or t["estado"] != "pendente":
-        print("  Transferencia nao encontrada ou nao esta pendente.")
-        return
-
-    # Move o jogador para o clube destino
-    for j in jogadores:
-        if j["id"] == t["jogador_id"]:
-            j["clube_id"] = t["clube_destino_id"]
-            break
-
-    t["estado"] = "concluida"
-    print(f"  Transferencia {id_t} concluida! Jogador movido para o clube destino.")
-
-
-def cancelar_transferencia():
-    print("\n  --- CANCELAR TRANSFERENCIA ---")
-
-    pendentes = [t for t in transferencias if t["estado"] == "pendente"]
-    if len(pendentes) == 0:
-        print("  Nao ha transferencias pendentes.")
-        return
-
-    for t in pendentes:
-        print(f"    [{t['id']}] Jogador ID {t['jogador_id']} -> Clube ID {t['clube_destino_id']} | {t['valor']}M")
-
-    try:
-        id_t = int(input("\n  ID da transferencia a cancelar: "))
-    except ValueError:
-        print("  ID invalido.")
-        return
-
-    t = _encontrar_transferencia(id_t)
-    if t is None or t["estado"] != "pendente":
-        print("  Transferencia nao encontrada ou nao esta pendente.")
-        return
-
-    t["estado"] = "cancelada"
-    print("  Transferencia cancelada!")
-
-
-# ──────────────────────────────────────────
-#  DELETE
-# ──────────────────────────────────────────
-
-def eliminar_transferencia():
-    print("\n  --- ELIMINAR TRANSFERENCIA ---")
-    _listar_resumo()
-
-    try:
-        id_t = int(input("\n  ID da transferencia a eliminar: "))
-    except ValueError:
-        print("  ID invalido.")
-        return
-
-    t = _encontrar_transferencia(id_t)
+    t = _encontrar_transferencia(id_transferencia)
     if t is None:
-        print("  Transferencia nao encontrada.")
-        return
+        return (404, "Transferencia nao encontrada.")
 
     if t["estado"] == "pendente":
-        print("  Nao podes eliminar uma transferencia pendente. Cancela primeiro.")
-        return
+        return (400, "Nao e possivel remover uma transferencia pendente. Cancela primeiro.")
 
-    confirmacao = input(f"  Eliminar transferencia {id_t}? (s/n): ")
-    if confirmacao.lower() == "s":
-        transferencias.remove(t)
-        print("  Transferencia eliminada!")
-    else:
-        print("  Operacao cancelada.")
-
-
-# ──────────────────────────────────────────
-#  MENU
-# ──────────────────────────────────────────
-
-def menu_transferencias(jogadores, clubes, empresarios):
-    while True:
-        print("\n=============================")
-        print("   MENU — TRANSFERENCIAS     ")
-        print("=============================")
-        print("  1. Registar transferencia")
-        print("  2. Listar transferencias")
-        print("  3. Ver detalhes")
-        print("  4. Editar transferencia")
-        print("  5. Concluir transferencia")
-        print("  6. Cancelar transferencia")
-        print("  7. Eliminar transferencia")
-        print("  0. Voltar")
-        _linha()
-        opcao = input("  Opcao: ")
-
-        if   opcao == "1": adicionar_transferencia(jogadores, clubes, empresarios)
-        elif opcao == "2": listar_transferencias(jogadores, clubes, empresarios)
-        elif opcao == "3": ver_transferencia(jogadores, clubes, empresarios)
-        elif opcao == "4": editar_transferencia()
-        elif opcao == "5": concluir_transferencia(jogadores)
-        elif opcao == "6": cancelar_transferencia()
-        elif opcao == "7": eliminar_transferencia()
-        elif opcao == "0": break
-        else: print("  Opcao invalida!")
+    transferencias.remove(t)
+    return (200, f"Transferencia #{t['id']} removida com sucesso.")
