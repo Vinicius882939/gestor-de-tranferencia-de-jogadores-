@@ -3,6 +3,10 @@
 # CRUD de Clubes
 # ==============================
 
+import json
+
+FICHEIRO = "clubes.json"
+
 clubes = []
 proximo_id = 1
 
@@ -12,6 +16,26 @@ def _encontrar_clube(id_clube):
         if c["id"] == id_clube:
             return c
     return None
+
+
+# GUARDAR
+def guardar_ficheiro():
+    with open(FICHEIRO, "w") as f:
+        json.dump(clubes, f, indent=4)
+    return (200, "Clubes guardados com sucesso.")
+
+
+# CARREGAR
+def carregar_ficheiro():
+    global clubes, proximo_id
+    try:
+        with open(FICHEIRO, "r") as f:
+            clubes = json.load(f)
+        if len(clubes) > 0:
+            proximo_id = max(c["id"] for c in clubes) + 1
+        return (200, "Clubes carregados com sucesso.")
+    except FileNotFoundError:
+        return (404, "Ficheiro nao encontrado. A comecar com lista vazia.")
 
 
 # CREATE
