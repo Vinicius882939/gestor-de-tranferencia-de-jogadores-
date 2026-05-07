@@ -3,6 +3,10 @@
 # CRUD de Jogadores
 # ==============================
 
+import json
+
+FICHEIRO = "jogadores.json"
+
 jogadores = []
 proximo_id = 1
 
@@ -12,6 +16,26 @@ def _encontrar_jogador(id_jogador):
         if j["id"] == id_jogador:
             return j
     return None
+
+
+# GUARDAR
+def guardar_ficheiro():
+    with open(FICHEIRO, "w") as f:
+        json.dump(jogadores, f, indent=4)
+    return (200, "Jogadores guardados com sucesso.")
+
+
+# CARREGAR
+def carregar_ficheiro():
+    global jogadores, proximo_id
+    try:
+        with open(FICHEIRO, "r") as f:
+            jogadores = json.load(f)
+        if len(jogadores) > 0:
+            proximo_id = max(j["id"] for j in jogadores) + 1
+        return (200, "Jogadores carregados com sucesso.")
+    except FileNotFoundError:
+        return (404, "Ficheiro nao encontrado. A comecar com lista vazia.")
 
 
 # CREATE
