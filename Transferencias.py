@@ -134,3 +134,4 @@ def remover_transferencia(id_transferencia):
 
     transferencias.remove(t)
     return (200, f"Transferencia #{t['id']} removida com sucesso.")
+    
