@@ -3,25 +3,25 @@
 # menu terminal para testar CRUD
 # ==============================
 
-from clubes import (
+from src.clubes import (
     criar_clube, listar_clubes, consultar_clube,
     atualizar_clube, remover_clube,
     guardar_ficheiro as guardar_clubes,
     carregar_ficheiro as carregar_clubes
 )
-from jogadores import (
+from src.jogadores import (
     criar_jogador, listar_jogadores, consultar_jogador,
     atualizar_jogador, remover_jogador,
     guardar_ficheiro as guardar_jogadores,
     carregar_ficheiro as carregar_jogadores
 )
-from empresarios import (
+from src.empresarios import (
     criar_empresario, listar_empresarios, consultar_empresario,
     atualizar_empresario, remover_empresario,
     guardar_ficheiro as guardar_empresarios,
     carregar_ficheiro as carregar_empresarios
 )
-from transferencias import (
+from src.transferencias import (
     criar_transferencia, listar_transferencias, consultar_transferencia,
     atualizar_transferencia, remover_transferencia,
     guardar_ficheiro as guardar_transferencias,
